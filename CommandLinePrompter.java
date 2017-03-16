@@ -26,29 +26,19 @@ public class CommandLinePrompter extends Prompter
 			public String minimumStart = "";
 			public String returnString = "";
 
+
 			public String call()
 			{
 				boolean done = false;
 				started = true;
 
 				try{
-					//while (! done)
-					//{
-						if (canceled)
-						{	throw new InterruptedException();	}
+					if (canceled)
+					{	throw new InterruptedException();	}
 
-						List<String> startChars = nextLegalChars(
-							regex, returnString);
-						//if ((startChars.size() == 2) &&
-						//	(startChars.get(0).equals("" +
-						//		ConsoleKeyPressPrompter.ENTER)))
-						//{
-						//	putChar(startChars.get(0));
-						//	minimumStart = returnString;
-						//}
-						//else
-						//{	done = true;		}
-					//}
+					while (nextLegalChars(regex, minimumStart).size() == 1)
+					{	minimumStart += nextLegalChars(regex, minimumStart).get(0);	}
+
 					done = false;
 					while (! done){
 						if (canceled)
@@ -216,11 +206,11 @@ public class CommandLinePrompter extends Prompter
 	{
 		boolean done = false;
 		//String s = "0|([1-9]\\d{0,1}0)|([1-9]\\d{0,2}(,\\d\\d\\d){0,2}(,\\d\\d0))";
-		//String s = "Sally|Sarah|Salacious\\sCrumb";
+		String s = "Sally|Sarah|Salacious Crumb";
 		//String s = "pass|(deploy\\s(((Endor|Yavin\\s4) from hand to table)|(asteroids from hand to (Tatooine|Coruscant))))|play from hand (Bith Shuffle|The Signal)|search Reserve Deck using game text of Hunt Down and Destroy the Jedi";
 		//String s = "pass";
 		//String s = "Sal|Sally";
-		String s = "|Jack\\*bot|Yahoo|Kkkkkkkb";
+		//String s = "Jack\\*bot|Yahoo|Kkkkkkkb";
 		List<String> l = new ArrayList<String>(); l.add(""+ConsoleKeyPressPrompter.ENTER);
 		Prompter a = ConsoleKeyPressPrompter.prompt("Press Something", l);
 		System.out.println("press enter");
