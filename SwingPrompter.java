@@ -15,7 +15,7 @@ public class SwingPrompter extends Prompter
 	private ExecutorService executorService1;
 	private Future<String> wrappedFuture;
 	private String regex;
-	private JFrame f;
+	private SwingPrompterFrame f;
 	private JLabel l;
 	private JPanel contentPane;
 	private boolean started;
@@ -23,7 +23,7 @@ public class SwingPrompter extends Prompter
 	private boolean completed;
 	private Callable<String> call;
 
-	private SwingPrompter(String[] prompt, String r)
+	private SwingPrompter(String[] prompt, String r, SwingPrompterFrame spFrame)
 	{
 		regex = r;
 		executorService1 = Executors.newSingleThreadExecutor();
@@ -43,43 +43,97 @@ public class SwingPrompter extends Prompter
 				done = false;
 				started = true;
 
-				f = new JFrame(prompt.length > 0 ? prompt[0] : "");
-
-				contentPane = (JPanel) f.getContentPane();
-				contentPane.setLayout(null);
-				f.setVisible(true);
-
-				f.setSize(640, 480);
-
-				if (prompt.length > 1)
+				if (spFrame == null)
 				{
-					l = new JLabel(prompt[1], SwingConstants.CENTER);
-					l.setBackground(Color.MAGENTA);
-					//l.setSize(640, 100);
-					//l.setText("abcd\n\nVocabulary Reading\n");
-					l.setOpaque(true);
+					f = new SwingPrompterFrame(prompt.length > 0 ? prompt[0] : "");
+					contentPane = (JPanel) f.getContentPane();
+					contentPane.setLayout(null);
+					java.util.List<JLabel> promptLabel = new ArrayList<JLabel>();
+
+					int x = 0;
+					int y = 0;
+					int WIDTH = 640;
+					int HEIGHT = 100;
+					int FONT_SIZE = 48;
+
+					for (int index = 1; index < prompt.length; index++)
+					{
+						l = new JLabel(prompt[index].split("\t")[0], SwingConstants.CENTER);
+						try
+						{
+							l.setBackground(prompt[index].split("\t").length > 1 ?
+								((Color)(Class.forName("java.awt.Color").getDeclaredField(
+								prompt[index].split("\t")[1].toLowerCase())).get(null)) : Color.WHITE);
+						}
+						catch(Exception e){}
+						l.setOpaque(true);
+						l.setFont(new Font("Serif", Font.PLAIN, FONT_SIZE));
+						l.setBounds(x,y,WIDTH,HEIGHT);
+						contentPane.add(l);
+						promptLabel.add(l);
+						y = y + HEIGHT;
+					}
+					f.putInfoLabels(promptLabel);
+
+					l = new JLabel("", SwingConstants.CENTER);
+					l.setBackground(Color.WHITE);
+					l.setOpaque (true);
 					l.setFont(new Font("Serif", Font.PLAIN, 48));
-					l.setBounds(0,0,640,100);
-					contentPane.add(l);
+					l.setBounds(x,y,WIDTH,HEIGHT);
+					y = y + HEIGHT;
+					f.putResponseLabel(l);
+
+					f.setVisible(true);
+
+					f.setSize(WIDTH, y + 50);
 				}
-				if (prompt.length > 2)
+				else
 				{
-					l = new JLabel(prompt[2], SwingConstants.CENTER);
-					l.setBackground(Color.MAGENTA);
-					//l.setSize(640, 100);
-					//l.setText("abcd\n\nVocabulary Reading\n");
-					l.setOpaque(true);
-					l.setFont(new Font("Serif", Font.PLAIN, 48));
-					l.setBounds(0,150,640,100);
-					contentPane.add(l);
+					f = spFrame;
+					contentPane = ((JPanel)f.getContentPane());
+
+					//retitle the PrompterFrame
+					if (prompt.length > 0)
+					{	f.setTitle(prompt[0]);		}
+
+					Iterator<JLabel> i = f.getInfoLabels().iterator();
+					//iterate through the arguments and the info labels
+					for (int index = 1; index < prompt.length; index++)
+					{
+						if (i.hasNext())
+						{
+							JLabel next = i.next();
+							if (next != null)
+							{
+								next.setText(prompt[index].split("\t")[0]);
+								if (prompt[index].split("\t").length > 1)
+								{
+									try
+									{
+										l.setBackground(prompt[index].split("\t").length > 1 ?
+											((Color)(Class.forName("java.awt.Color").getDeclaredField(
+											prompt[index].split("\t")[1].toLowerCase())).get(null)) : Color.WHITE);
+									}
+									catch(Exception e){}
+								}
+							}
+						}
+					}
 				}
-				l = new JLabel("", SwingConstants.CENTER);
-				//bg.setSize(500,100);
-				l.setBackground(Color.GREEN);
-				//bg.setText((new HiraganaKI().toString()+new HiraganaMA().toString()+new HiraganaGU().toString()+new HiraganaRE().toString()));
-				l.setOpaque (true);
-				l.setFont(new Font("Serif", Font.PLAIN, 48));
-				l.setBounds(0,300,640,100);
+
+				f.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
+				f.addWindowListener(new WindowAdapter(){
+					public void windowClosing(WindowEvent e)
+					{
+						JFrame frame = (JFrame) e.getSource();
+
+						cancel(true);
+						frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+					}
+				});
+
+				l = f.getResponseLabel();
+
 				for (char ch : new char[]{'!', '\"', '#', '$', '&', '\'', '(', ')',
 							'*', '+', ',', '-', '.', '/', '0', '1', '2', '3', '4',
 							'5', '6', '7', '8', '9', ':', ';', '<', '=', '>', '?',
@@ -141,9 +195,12 @@ public class SwingPrompter extends Prompter
 				{
 					if (canceled)
 					{	return null;	}
+
+
+					System.out.print("");
 				}
 
-				System.out.println(done);
+				l.getActionMap().remove("process key");
 
 				return returnString;
 			}
@@ -201,8 +258,6 @@ public class SwingPrompter extends Prompter
 									(input.equals("" +
 									ConsoleKeyPressPrompter.RETURN)))
 								{
-									//putChar("" +
-									//	ConsoleKeyPressPrompter.ENTER);
 									done = true;
 									doneProcessing = true;
 									inputProcessed = true;
@@ -228,16 +283,18 @@ public class SwingPrompter extends Prompter
 						0, returnString.length()-1);
 
 					l.setText(returnString);
+					returnString = l.getText();
 
 					justHitBackspace = true;
 				}
 				else if ((charToPut.equals(""+ConsoleKeyPressPrompter.ENTER))|
 					(charToPut.equals(""+ConsoleKeyPressPrompter.RETURN)))
-				{		}
+				{	}
 				else
 				{
 					returnString += charToPut;
 					l.setText(returnString);
+					returnString = l.getText();
 
 					justHitBackspace = false;
 				}
@@ -288,7 +345,10 @@ public class SwingPrompter extends Prompter
 			if ((! started) || mayInterruptIfRunning);
 			{
 				if (! completed)
-				{	canceled = true;	}
+				{
+					canceled = true;
+					if (l != null)	{l.getActionMap().remove("process key");}
+				}
 			}
 			return wrappedFuture.cancel(mayInterruptIfRunning);
 		}
@@ -314,7 +374,13 @@ public class SwingPrompter extends Prompter
 	{	return wrappedFuture.isDone();					}
 
 	public static Prompter prompt(String prompt, String regex)
-	{	return new SwingPrompter(prompt.split("\n"), regex);	}
+	{	return new SwingPrompter(prompt.split("\n"), regex, null);	}
+
+	public static SwingPrompter prompt(String prompt, String regex, SwingPrompterFrame frame)
+	{	return new SwingPrompter(prompt.split("\n"), regex, frame);	}
+
+	public SwingPrompterFrame getFrame()
+	{	return f;	}
 
 	public static void main (String[] args)
 	{
@@ -331,9 +397,41 @@ public class SwingPrompter extends Prompter
 		//System.out.println("press enter");
 		//while (! a.isDone())
 		//{}
-		Prompter p = SwingPrompter.prompt("Enter Score\nDo it now!\nVocabulary Reading", s);
+		Prompter p = SwingPrompter.prompt("Enter Score\nDo it now!\tyellow\nVocabulary Reading\tyellow\nPlease\tyellow", s);
 		//String r = "";
 		System.out.println("Your move");
+		while (! p.isDone())
+		{}
+		try
+		{
+			System.out.println(p.get());
+		}
+		catch (InterruptedException e)
+		{	System.out.println("interrupted!");	}
+		catch (Exception e){e.printStackTrace();}
+
+		SwingPrompterFrame f = ((SwingPrompter)p).getFrame();
+		JLabel pan = new JLabel("", SwingConstants.CENTER){
+			public void setText(String t)
+			{
+				t = t.replace("ta", "" + ((char)12383)).replace("ti", "" + (char)12385);
+				super.setText(t);
+			}
+		};
+
+		pan.setBackground(Color.green);
+		pan.setOpaque (true);
+		pan.setFont(new Font("Serif", Font.PLAIN, 48));
+		pan.setBounds(0,400,640,100);
+
+		pan.setVisible(true);
+
+		f.setSize(640,550);
+		//f.getResponseLabel().setVisible(false);
+		f.putResponseLabel(pan);
+		f.getContentPane().add(pan);
+
+		p = SwingPrompter.prompt("Enter Score\nDo it now!\tyellow\nVocabulary Reading\tyellow\nIf you would\tyellow", "(" + ((char)12383) + "|" + ((char)12385) + "){0,20}(ta|ti|)", f);
 		while (! p.isDone())
 		{}
 		try
