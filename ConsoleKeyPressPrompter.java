@@ -1,7 +1,7 @@
-import jline.ConsoleReader;
+import jline.console.ConsoleReader;
 import java.util.*;
 import java.util.concurrent.*;
-import java.io.*;
+//import java.io.*;
 
 public class ConsoleKeyPressPrompter extends Prompter/*<Character>*/
 {
@@ -68,7 +68,7 @@ public class ConsoleKeyPressPrompter extends Prompter/*<Character>*/
 		executorService1 = Executors.newSingleThreadExecutor();
 
 
-		final List<String>/*<Character>*/ vr = validResponse;
+		final List<String>/*<Character>*/ vr = this.validResponse;
 		wrappedFuture = executorService1.submit(new Callable<String>(){
 			public String/*Character*/ call()
 			{

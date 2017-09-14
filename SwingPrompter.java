@@ -1,14 +1,9 @@
-import jline.ConsoleReader;
 import java.util.*;
 import java.util.concurrent.*;
 import java.util.regex.*;
-import java.io.*;
-import javax.accessibility.*;
 import javax.swing.*;
 import java.awt.*;
-import java.awt.image.*;
 import java.awt.event.*;
-import java.io.*;
 
 public class SwingPrompter extends Prompter
 {
@@ -21,7 +16,7 @@ public class SwingPrompter extends Prompter
 	private boolean started;
 	private boolean canceled;
 	private boolean completed;
-	private Callable<String> call;
+	//private Callable<String> call;
 
 	private SwingPrompter(String[] prompt, String r, SwingPrompterFrame spFrame)
 	{
@@ -38,7 +33,7 @@ public class SwingPrompter extends Prompter
 
 			public String call()
 			{
-				call = this;
+				//call = this;
 
 				done = false;
 				started = true;
@@ -90,6 +85,7 @@ public class SwingPrompter extends Prompter
 				else
 				{
 					f = spFrame;
+					f.getResponseLabel().setText("");
 					contentPane = ((JPanel)f.getContentPane());
 
 					//retitle the PrompterFrame
@@ -151,6 +147,8 @@ public class SwingPrompter extends Prompter
 
 
 				l.getActionMap().put("process key", new AbstractAction("a"){
+					private static final long serialVersionUID = 1L;
+
 					public void actionPerformed(ActionEvent e)
 					{
 						Object source = e.getSource();
@@ -213,7 +211,7 @@ public class SwingPrompter extends Prompter
 					if (canceled)
 					{	throw new InterruptedException();	}
 
-					java.util.List<String> startChars = nextLegalChars(regex, returnString);
+					//java.util.List<String> startChars = nextLegalChars(regex, returnString);
 
 					java.util.List<String> nextCharList = nextLegalChars(
 						regex, returnString);
@@ -384,7 +382,6 @@ public class SwingPrompter extends Prompter
 
 	public static void main (String[] args)
 	{
-		boolean done = false;
 		//String s = "0|([1-9]\\d{0,1}0)|([1-9]\\d{0,2}(,\\d\\d\\d){0,2}(,\\d\\d0))";
 		String s = "Sally|Sarah|Salacious\\sCrumb";
 		//String s = "pass|(deploy\\s(((Endor|Yavin\\s4) from hand to table)|(asteroids from hand to (Tatooine|Coruscant))))|play from hand (Bith Shuffle|The Signal)|search Reserve Deck using game text of Hunt Down and Destroy the Jedi";
@@ -411,7 +408,9 @@ public class SwingPrompter extends Prompter
 		catch (Exception e){e.printStackTrace();}
 
 		SwingPrompterFrame f = ((SwingPrompter)p).getFrame();
+		System.out.println(f.getInfoLabels().size());
 		JLabel pan = new JLabel("", SwingConstants.CENTER){
+			private static final long serialVersionUID = -892647324623906088L;
 			public void setText(String t)
 			{
 				t = t.replace("ta", "" + ((char)12383)).replace("ti", "" + (char)12385);

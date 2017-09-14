@@ -4,6 +4,7 @@ import java.util.ArrayList;
 
 public class SwingPrompterFrame extends JFrame
 {
+	private static final long serialVersionUID = 1L;
 	private List<JLabel> infoLabel = new ArrayList<JLabel>();
 	private JLabel responseLabel = new JLabel();
 
@@ -21,7 +22,10 @@ public class SwingPrompterFrame extends JFrame
 	public void putResponseLabel(JLabel responseLabel)
 	{
 		if (responseLabel != null)
-		{	this.responseLabel = responseLabel;		}
+		{	
+			this.responseLabel = responseLabel;		
+			this.getContentPane().add(responseLabel);
+		}
 	}
 
 	public List<JLabel> getInfoLabels()
@@ -37,6 +41,8 @@ public class SwingPrompterFrame extends JFrame
 		{
 			this.infoLabel = new ArrayList<JLabel>();
 			this.infoLabel.addAll(infoLabel);
+			for (JLabel label : infoLabel)
+			{	this.getContentPane().add(label);	}
 		}
 	}
 }

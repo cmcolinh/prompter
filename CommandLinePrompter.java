@@ -1,10 +1,6 @@
-import jline.ConsoleReader;
 import java.util.*;
 import java.util.concurrent.*;
 import java.util.regex.*;
-import java.io.*;
-
-import javax.swing.*;
 
 public class CommandLinePrompter extends Prompter
 {
@@ -204,7 +200,6 @@ public class CommandLinePrompter extends Prompter
 
 	public static void main (String[] args)
 	{
-		boolean done = false;
 		//String s = "0|([1-9]\\d{0,1}0)|([1-9]\\d{0,2}(,\\d\\d\\d){0,2}(,\\d\\d0))";
 		String s = "Sally|Sarah|Salacious Crumb";
 		//String s = "pass|(deploy\\s(((Endor|Yavin\\s4) from hand to table)|(asteroids from hand to (Tatooine|Coruscant))))|play from hand (Bith Shuffle|The Signal)|search Reserve Deck using game text of Hunt Down and Destroy the Jedi";
