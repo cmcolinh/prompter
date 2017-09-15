@@ -73,6 +73,7 @@ public class SwingPrompter extends Prompter
 					l = new JLabel("", SwingConstants.CENTER);
 					l.setBackground(Color.WHITE);
 					l.setOpaque (true);
+					l.setText("<html></html>");
 					l.setFont(new Font("Serif", Font.PLAIN, 48));
 					l.setBounds(x,y,WIDTH,HEIGHT);
 					y = y + HEIGHT;
@@ -85,7 +86,7 @@ public class SwingPrompter extends Prompter
 				else
 				{
 					f = spFrame;
-					f.getResponseLabel().setText("");
+					f.getResponseLabel().setText("<html></html>");
 					contentPane = ((JPanel)f.getContentPane());
 
 					//retitle the PrompterFrame
@@ -203,7 +204,7 @@ public class SwingPrompter extends Prompter
 				return returnString;
 			}
 
-			public void processInput(String input) throws InterruptedException
+			public synchronized void processInput(String input) throws InterruptedException
 			{
 					boolean doneProcessing = false;
 					boolean inputProcessed = false;
@@ -280,8 +281,8 @@ public class SwingPrompter extends Prompter
 					returnString=returnString.substring(
 						0, returnString.length()-1);
 
-					l.setText(returnString);
-					returnString = l.getText();
+					l.setText("<html>" + returnString + "</html>");
+					returnString = l.getText().substring("<html>".length(), l.getText().length() - "</html>".length());
 
 					justHitBackspace = true;
 				}
@@ -291,9 +292,8 @@ public class SwingPrompter extends Prompter
 				else
 				{
 					returnString += charToPut;
-					l.setText(returnString);
-					returnString = l.getText();
-
+					l.setText("<html>" + returnString + "</html>");
+					returnString = l.getText().substring("<html>".length(), l.getText().length() - "</html>".length());
 					justHitBackspace = false;
 				}
 			}
@@ -383,8 +383,8 @@ public class SwingPrompter extends Prompter
 	public static void main (String[] args)
 	{
 		//String s = "0|([1-9]\\d{0,1}0)|([1-9]\\d{0,2}(,\\d\\d\\d){0,2}(,\\d\\d0))";
-		String s = "Sally|Sarah|Salacious\\sCrumb";
-		//String s = "pass|(deploy\\s(((Endor|Yavin\\s4) from hand to table)|(asteroids from hand to (Tatooine|Coruscant))))|play from hand (Bith Shuffle|The Signal)|search Reserve Deck using game text of Hunt Down and Destroy the Jedi";
+		//String s = "Sally|Sarah|Salacious\\sCrumb";
+		String s = "pass|(deploy\\s(((Endor|Yavin\\s4) from hand to table)|(asteroids from hand to (Tatooine|Coruscant))))|play from hand (Bith Shuffle|The Signal)|search Reserve Deck using game text of Hunt Down and Destroy the Jedi";
 		//String s = "pass";
 		//String s = "Sal|Sally";
 		//String s = "(a){0,20}";
